@@ -346,7 +346,7 @@ export default function CalendarPage() {
                 </p>
                 <h3 className="text-white font-black text-lg">{formatDate(selected)}</h3>
               </div>
-              <Link href={`/finder?date=${selected}`}>
+              <Link href={`/finder?date=${selected}&tab=map`}>
                 <LiquidButton
                   size="sm"
                   className="rounded-full font-black flex items-center gap-2"

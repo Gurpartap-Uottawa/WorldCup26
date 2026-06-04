@@ -160,15 +160,24 @@ export default function LandingPage() {
           <Link href="/calendar" className="hover:text-white transition-colors">Calendar</Link>
         </div>
 
-        <Link href="/finder">
-          <LiquidButton
-            size="sm"
-            className="rounded-full font-black tracking-wide"
-            style={{ color: "#FFD700" }}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/calendar"
+            className="md:hidden text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+            style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
-            OPEN APP →
-          </LiquidButton>
-        </Link>
+            Calendar
+          </Link>
+          <Link href="/finder">
+            <LiquidButton
+              size="sm"
+              className="rounded-full font-black tracking-wide"
+              style={{ color: "#FFD700" }}
+            >
+              OPEN APP →
+            </LiquidButton>
+          </Link>
+        </div>
       </nav>
 
       {/* ── Hero — Circular Gallery ────────────────────────────────────────── */}

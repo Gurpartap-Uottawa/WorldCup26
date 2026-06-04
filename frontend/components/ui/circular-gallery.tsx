@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef, HTMLAttributes } from 'react'
+import { useState, useEffect, useRef, HTMLAttributes } from 'react'
 
 const cn = (...classes: (string | undefined | null | false)[]) => {
   return classes.filter(Boolean).join(' ')
@@ -22,12 +22,23 @@ interface CircularGalleryProps extends HTMLAttributes<HTMLDivElement> {
   autoRotateSpeed?: number
 }
 
-const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
-  ({ items, className, radius = 600, autoRotateSpeed = 0.02, ...props }, ref) => {
+const CircularGallery = ({ items, className, radius = 600, autoRotateSpeed = 0.02, ...props }: CircularGalleryProps) => {
     const [rotation, setRotation] = useState(0)
     const [isScrolling, setIsScrolling] = useState(false)
+    const [scale, setScale] = useState(1)
+    const containerRef = useRef<HTMLDivElement>(null)
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const animationFrameRef = useRef<number | null>(null)
+
+    useEffect(() => {
+      const updateScale = () => {
+        const w = containerRef.current?.offsetWidth ?? window.innerWidth
+        setScale(Math.min(1, Math.max(0.62, w / 1000)))
+      }
+      updateScale()
+      window.addEventListener('resize', updateScale)
+      return () => window.removeEventListener('resize', updateScale)
+    }, [])
 
     useEffect(() => {
       const handleScroll = () => {
@@ -64,10 +75,13 @@ const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
     }, [isScrolling, autoRotateSpeed])
 
     const anglePerItem = 360 / items.length
+    const effectiveRadius = radius * scale
+    const cardW = Math.round(300 * scale)
+    const cardH = Math.round(400 * scale)
 
     return (
       <div
-        ref={ref}
+        ref={containerRef}
         role="region"
         aria-label="Circular 3D Gallery"
         className={cn('relative w-full h-full flex items-center justify-center', className)}
@@ -93,13 +107,15 @@ const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
                 key={item.photo.url}
                 role="group"
                 aria-label={item.common}
-                className="absolute w-[300px] h-[400px]"
                 style={{
-                  transform: `rotateY(${itemAngle}deg) translateZ(${radius}px)`,
+                  position: 'absolute',
+                  width: `${cardW}px`,
+                  height: `${cardH}px`,
+                  transform: `rotateY(${itemAngle}deg) translateZ(${effectiveRadius}px)`,
                   left: '50%',
                   top: '50%',
-                  marginLeft: '-150px',
-                  marginTop: '-200px',
+                  marginLeft: `-${cardW / 2}px`,
+                  marginTop: `-${cardH / 2}px`,
                   opacity,
                   transition: 'opacity 0.3s linear',
                 }}
@@ -122,9 +138,6 @@ const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
         </div>
       </div>
     )
-  }
-)
-
-CircularGallery.displayName = 'CircularGallery'
+}
 
 export { CircularGallery }

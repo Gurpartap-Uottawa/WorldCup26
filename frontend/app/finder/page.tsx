@@ -37,7 +37,9 @@ function FinderContent() {
   const [loadingScreenings, setLoadingScreenings] = useState(false)
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [focusedMatchCity, setFocusedMatchCity] = useState<string | null>(null)
-  const [mobileTab, setMobileTab] = useState<"matches" | "map">("matches")
+  const [mobileTab, setMobileTab] = useState<"matches" | "map">(
+    searchParams.get("tab") === "map" ? "map" : "matches"
+  )
 
   const dateStr = format(selectedDate, "yyyy-MM-dd")
 
@@ -107,11 +109,11 @@ function FinderContent() {
         <div className="flex items-center gap-3">
           <Link
             href="/calendar"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg"
             style={{ color: "rgba(255,255,255,0.45)", border: "1px solid #1a2857" }}
           >
             <CalendarDays size={14} />
-            Full Calendar
+            <span className="hidden sm:inline">Full Calendar</span>
           </Link>
           <span className="text-white/60 text-sm hidden lg:block">
             {format(selectedDate, "EEEE, MMM d, yyyy")}
@@ -179,10 +181,12 @@ function FinderContent() {
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-0 overflow-hidden">
+      <div className="flex-1 relative overflow-hidden lg:flex lg:flex-row">
+        {/* Matches panel — slides off-left on mobile when map tab active; normal flow on desktop */}
         <div
-          className={`lg:w-[420px] lg:min-w-[380px] flex-shrink-0 overflow-y-auto ${mobileTab === "matches" ? "block" : "hidden lg:block"}`}
-          style={{ maxHeight: "calc(100vh - 60px)" }}
+          className={`absolute inset-0 overflow-y-auto transition-transform duration-300
+            lg:relative lg:inset-auto lg:w-[420px] lg:min-w-[380px] lg:flex-shrink-0 lg:translate-x-0
+            ${mobileTab === "matches" ? "translate-x-0" : "-translate-x-full"}`}
         >
           <MatchesPanel
             matches={matches}
@@ -193,7 +197,12 @@ function FinderContent() {
           />
         </div>
 
-        <div className={`flex-1 min-h-[calc(100vh-120px)] lg:min-h-0 ${mobileTab === "map" ? "block" : "hidden lg:block"}`}>
+        {/* Map panel — always mounted so Google Maps initialises; slides in from right on mobile */}
+        <div
+          className={`absolute inset-0 transition-transform duration-300
+            lg:relative lg:inset-auto lg:flex-1 lg:translate-x-0
+            ${mobileTab === "map" ? "translate-x-0" : "translate-x-full"}`}
+        >
           <MapPanel
             matches={matches}
             screenings={filteredScreenings}
