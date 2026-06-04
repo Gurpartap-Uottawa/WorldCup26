@@ -87,7 +87,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
     binomial: "Norway",
     lure: "A machine built for one purpose: scoring goals. Erling Haaland steps onto the biggest stage of his life carrying the most ferocious scoring record in football — and he has never looked more unstoppable.",
     photo: {
-      url: "/haaland.jpg",
+      url: "/haaland1.jpg",
       text: "Erling Haaland",
       pos: "center top",
       by: "Norway",
