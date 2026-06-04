@@ -32,6 +32,8 @@ const CircularGallery = ({ items, className, radius = 600, autoRotateSpeed = 0.0
     const containerRef = useRef<HTMLDivElement>(null)
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const animationFrameRef = useRef<number | null>(null)
+    const touchStartXRef = useRef<number>(0)
+    const touchRotationStartRef = useRef<number>(0)
 
     useEffect(() => {
       const updateScale = () => {
@@ -139,6 +141,16 @@ const CircularGallery = ({ items, className, radius = 600, autoRotateSpeed = 0.0
         aria-label="Circular 3D Gallery"
         className={cn('relative w-full h-full flex items-center justify-center', className)}
         style={{ perspective: '2000px' }}
+        onTouchStart={e => {
+          touchStartXRef.current = e.touches[0].clientX
+          touchRotationStartRef.current = rotation
+          setIsScrolling(true)
+        }}
+        onTouchMove={e => {
+          const delta = e.touches[0].clientX - touchStartXRef.current
+          setRotation(touchRotationStartRef.current + delta * 0.3)
+        }}
+        onTouchEnd={() => setIsScrolling(false)}
         {...props}
       >
         <div
