@@ -3,6 +3,7 @@ import Link from "next/link"
 import CarouselCard from "@/components/ui/carousel-card"
 import { CircularGallery, GalleryItem } from "@/components/ui/circular-gallery"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
+import MobileMenu from "@/components/MobileMenu"
 
 const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
@@ -170,13 +171,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/calendar"
-            className="md:hidden text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
-            style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-          >
-            Calendar
-          </Link>
+          <MobileMenu />
           <Link href="/finder">
             <LiquidButton
               size="sm"

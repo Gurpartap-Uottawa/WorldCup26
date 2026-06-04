@@ -21,17 +21,34 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isSingleCard, setIsSingleCard] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [effectiveCards, setEffectiveCards] = useState(cardsPerView)
+  const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef<number>(0)
+  const touchEndX = useRef<number>(0)
 
   useEffect(() => {
     setIsSingleCard(data?.length === 1)
   }, [data])
 
-  const cardWidth = 75 / cardsPerView
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth
+      setIsMobile(w < 640)
+      if (w < 640) setEffectiveCards(1)
+      else if (w < 1024) setEffectiveCards(Math.min(2, cardsPerView))
+      else setEffectiveCards(cardsPerView)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [cardsPerView])
+
+  const cardWidth = 75 / effectiveCards
 
   const nextSlide = () => {
     if (isAnimating || !showCarousel || !data) return
-    if (data.length <= cardsPerView) return
+    if (data.length <= effectiveCards) return
 
     setIsAnimating(true)
     const nextIndex = (currentIndex + 1) % data.length
@@ -54,7 +71,7 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
 
   const prevSlide = () => {
     if (isAnimating || !showCarousel || !data) return
-    if (data.length <= cardsPerView) return
+    if (data.length <= effectiveCards) return
 
     setIsAnimating(true)
     const prevIndex = (currentIndex - 1 + data.length) % data.length
@@ -78,7 +95,7 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
 
     const visibleCards = []
     const totalCards = data.length
-    for (let i = 0; i < cardsPerView + 1; i++) {
+    for (let i = 0; i < effectiveCards + 1; i++) {
       const index = (currentIndex + i) % totalCards
       visibleCards.push(data[index])
     }
@@ -93,8 +110,8 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
     <div className="w-full px-8">
       <div className={`relative ${isSingleCard ? "max-w-sm mx-auto" : "w-full"}`}>
 
-        {/* ← Prev button */}
-        {showCarousel && data.length > cardsPerView && (
+        {/* ← → buttons — desktop only */}
+        {!isMobile && showCarousel && data.length > effectiveCards && (
           <>
             <button
               onClick={prevSlide}
@@ -111,7 +128,6 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
               ←
             </button>
 
-            {/* → Next button */}
             <button
               onClick={nextSlide}
               disabled={isAnimating}
@@ -130,7 +146,16 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
         )}
 
         {/* Overflow mask */}
-        <div className="overflow-hidden rounded-2xl">
+        <div
+          className="overflow-hidden rounded-2xl"
+          onTouchStart={e => { touchStartX.current = e.changedTouches[0].clientX }}
+          onTouchEnd={e => {
+            touchEndX.current = e.changedTouches[0].clientX
+            const delta = touchStartX.current - touchEndX.current
+            if (delta > 50) nextSlide()
+            else if (delta < -50) prevSlide()
+          }}
+        >
           {/* Sliding track */}
           <div
             ref={containerRef}
@@ -138,7 +163,7 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
             style={{
               transform: "translateX(0)",
               width: showCarousel
-                ? `${((cardsPerView + 1) * 100) / cardsPerView}%`
+                ? `${((effectiveCards + 1) * 100) / effectiveCards}%`
                 : "100%",
             }}
           >
@@ -149,7 +174,7 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
                   style={{ border: "1px solid #1a2857" }}
                 >
                   {/* Photo */}
-                  <div className="w-full h-72 overflow-hidden">
+                  <div className="w-full overflow-hidden" style={{ height: isMobile ? "200px" : "288px" }}>
                     <img
                       src={card.imgUrl}
                       alt={card.title}
@@ -157,45 +182,50 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
                     />
                   </div>
 
-                  {/* Always-visible title bar */}
+                  {/* Title bar */}
                   <div
                     className="px-4 py-3 flex items-center justify-between"
                     style={{ background: "#0e1638" }}
                   >
                     <p className="text-white font-bold text-sm">{card.title}</p>
                     {card.href && (
-                      <span className="text-xs font-black opacity-50" style={{ color: "#FFD700" }}>
-                        →
-                      </span>
+                      <span className="text-xs font-black opacity-50" style={{ color: "#FFD700" }}>→</span>
                     )}
                   </div>
 
-                  {/* Hover overlay — slides up from bottom */}
-                  <div
-                    className="absolute inset-0 p-5 transition-transform duration-300 transform translate-y-full group-hover:translate-y-0 overflow-y-auto flex flex-col justify-end"
-                    style={{ background: "rgba(10,15,44,0.96)" }}
-                  >
-                    <p
-                      className="font-black text-base mb-3 leading-tight"
-                      style={{ color: "#FFD700" }}
+                  {/* Mobile: description always visible */}
+                  {isMobile && (
+                    <div className="px-4 pb-5 pt-1" style={{ background: "#0e1638" }}>
+                      <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(255,255,255,0.6)" }}>
+                        {card.content}
+                      </p>
+                      {card.cta && (
+                        <span className="text-xs font-black tracking-wide" style={{ color: "#FFD700" }}>
+                          {card.cta} →
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Desktop: hover overlay slides up */}
+                  {!isMobile && (
+                    <div
+                      className="absolute inset-0 p-5 transition-transform duration-300 transform translate-y-full group-hover:translate-y-0 overflow-y-auto flex flex-col justify-end"
+                      style={{ background: "rgba(10,15,44,0.96)" }}
                     >
-                      {card.title}
-                    </p>
-                    <p
-                      className="text-sm leading-relaxed"
-                      style={{ color: "rgba(255,255,255,0.72)" }}
-                    >
-                      {card.content}
-                    </p>
-                    {card.cta && (
-                      <span
-                        className="mt-4 text-xs font-black tracking-wide"
-                        style={{ color: "#FFD700" }}
-                      >
-                        {card.cta} →
-                      </span>
-                    )}
-                  </div>
+                      <p className="font-black text-base mb-3 leading-tight" style={{ color: "#FFD700" }}>
+                        {card.title}
+                      </p>
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
+                        {card.content}
+                      </p>
+                      {card.cta && (
+                        <span className="mt-4 text-xs font-black tracking-wide" style={{ color: "#FFD700" }}>
+                          {card.cta} →
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
 
@@ -205,8 +235,8 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
                   className="px-2"
                   style={{
                     width: showCarousel
-                      ? `${100 / (cardsPerView + 1)}%`
-                      : `${100 / Math.min(cardsPerView, data.length)}%`,
+                      ? `${100 / (effectiveCards + 1)}%`
+                      : `${100 / Math.min(effectiveCards, data.length)}%`,
                   }}
                 >
                   {card.href ? (
@@ -223,7 +253,7 @@ const CarouselCard = ({ data, showCarousel = true, cardsPerView = 3 }: CardProps
         </div>
 
         {/* Dot indicators */}
-        {showCarousel && data.length > cardsPerView && (
+        {showCarousel && data.length > effectiveCards && (
           <div className="flex justify-center gap-1.5 mt-5">
             {data.map((_, i) => (
               <button
