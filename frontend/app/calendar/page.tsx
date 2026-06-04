@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { ArrowLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
@@ -235,9 +235,9 @@ export default function CalendarPage() {
                             if (!hasMatches) return
                             setSelected(isSelected ? null : date)
                           }}
-                          className="rounded-xl p-1.5 transition-all"
+                          className="rounded-xl p-1 sm:p-1.5 transition-all"
                           style={{
-                            minHeight: "90px",
+                            minHeight: "clamp(58px, 12vw, 90px)",
                             background: isSelected
                               ? "rgba(255,215,0,0.12)"
                               : hasMatches

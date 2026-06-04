@@ -228,11 +228,11 @@ export default function LandingPage() {
             </p>
 
             {/* CTA — pointer-events-auto overrides the parent none */}
-            <div className="mt-5 flex flex-col items-center gap-2 pointer-events-auto">
-              <Link href="/finder">
+            <div className="mt-5 flex flex-col items-center gap-2 pointer-events-auto w-full px-6 sm:w-auto sm:px-0">
+              <Link href="/finder" className="w-full sm:w-auto">
                 <LiquidButton
                   size="xl"
-                  className="rounded-full font-black text-lg w-fit"
+                  className="rounded-full font-black text-lg w-full sm:w-fit"
                   style={{ color: "#FFD700" }}
                 >
                   Find Screenings Near You →

@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback } from "react"
 import { format } from "date-fns"
-import { CalendarDays, ArrowLeft } from "lucide-react"
+import { CalendarDays, ArrowLeft, List, Map } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 import "react-day-picker/style.css"
 import Link from "next/link"
@@ -37,6 +37,7 @@ function FinderContent() {
   const [loadingScreenings, setLoadingScreenings] = useState(false)
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [focusedMatchCity, setFocusedMatchCity] = useState<string | null>(null)
+  const [mobileTab, setMobileTab] = useState<"matches" | "map">("matches")
 
   const dateStr = format(selectedDate, "yyyy-MM-dd")
 
@@ -122,6 +123,7 @@ function FinderContent() {
               className="rounded-lg flex items-center gap-2"
               style={{ color: "#FFD700" }}
             >
+              <CalendarDays size={14} />
               <span className="hidden sm:inline">Pick Date</span>
             </LiquidButton>
 
@@ -129,7 +131,7 @@ function FinderContent() {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
                 <div
-                  className="absolute right-0 top-full mt-2 z-50 rounded-xl shadow-2xl p-2"
+                  className="fixed left-4 right-4 top-16 z-50 rounded-xl shadow-2xl p-2 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-auto"
                   style={{ background: "#0e1638", border: "1px solid #1a2857" }}
                 >
                   <DayPicker
@@ -153,9 +155,33 @@ function FinderContent() {
         </div>
       </header>
 
+      {/* Mobile tab bar */}
+      <div className="lg:hidden flex border-b" style={{ borderColor: "#1a2857" }}>
+        <button
+          onClick={() => setMobileTab("matches")}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors"
+          style={{
+            color: mobileTab === "matches" ? "#FFD700" : "rgba(255,255,255,0.35)",
+            borderBottom: mobileTab === "matches" ? "2px solid #FFD700" : "2px solid transparent",
+          }}
+        >
+          <List size={15} /> Matches
+        </button>
+        <button
+          onClick={() => setMobileTab("map")}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-colors"
+          style={{
+            color: mobileTab === "map" ? "#FFD700" : "rgba(255,255,255,0.35)",
+            borderBottom: mobileTab === "map" ? "2px solid #FFD700" : "2px solid transparent",
+          }}
+        >
+          <Map size={15} /> Map
+        </button>
+      </div>
+
       <div className="flex-1 flex flex-col lg:flex-row gap-0 overflow-hidden">
         <div
-          className="lg:w-[420px] lg:min-w-[380px] flex-shrink-0 overflow-y-auto"
+          className={`lg:w-[420px] lg:min-w-[380px] flex-shrink-0 overflow-y-auto ${mobileTab === "matches" ? "block" : "hidden lg:block"}`}
           style={{ maxHeight: "calc(100vh - 60px)" }}
         >
           <MatchesPanel
@@ -163,11 +189,11 @@ function FinderContent() {
             loading={loadingMatches}
             selectedCity={selectedCity}
             onMatchClick={handleMatchClick}
-            onCityFilter={setSelectedCity}
+            onCityFilter={city => { setSelectedCity(city); setMobileTab("map") }}
           />
         </div>
 
-        <div className="flex-1 min-h-[400px] lg:min-h-0">
+        <div className={`flex-1 min-h-[calc(100vh-120px)] lg:min-h-0 ${mobileTab === "map" ? "block" : "hidden lg:block"}`}>
           <MapPanel
             matches={matches}
             screenings={filteredScreenings}
