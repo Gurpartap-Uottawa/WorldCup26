@@ -8,6 +8,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Lionel Messi",
     binomial: "Argentina",
+    lure: "The defending champion. The greatest of all time. At 38, Messi returns to defend the crown he waited his entire career for — and the whole world is watching to see if a legend can do the impossible twice.",
     photo: {
       url: "/messi%20world%20cup.jpg",
       text: "Lionel Messi with the World Cup trophy",
@@ -18,6 +19,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Cristiano Ronaldo",
     binomial: "Portugal",
+    lure: "He is 41 years old. His body has defied science. His hunger has defied time. This is Cristiano Ronaldo's final stand — and he has never, not once, backed down from the biggest stage.",
     photo: {
       url: "/cr7.jpg",
       text: "Cristiano Ronaldo",
@@ -28,6 +30,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Kylian Mbappé",
     binomial: "France",
+    lure: "France's captain at 27, Kylian Mbappé enters this tournament at the absolute summit of his powers. He was denied the trophy in 2022 by the finest of margins — this time, he has unfinished business.",
     photo: {
       url: "/mbappe.jpg",
       text: "Kylian Mbappé",
@@ -38,6 +41,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Neymar Jr",
     binomial: "Brazil",
+    lure: "Brazil haven't lifted the trophy since 2002. No player carries that weight heavier than Neymar — the most gifted dribbler on earth, arriving at this tournament with one last point to prove to the world.",
     photo: {
       url: "/neymar.jpg",
       text: "Neymar Jr",
@@ -48,6 +52,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Lamine Yamal",
     binomial: "Spain",
+    lure: "He was born the day Spain won their first World Cup in 2010. Now 18, Lamine Yamal arrives as the most electrifying teenager the game has ever produced — and he has come to write his own chapter of history.",
     photo: {
       url: "/lamine%20world%20cup.jpg",
       text: "Lamine Yamal",
@@ -58,6 +63,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Harry Kane",
     binomial: "England",
+    lure: "England's all-time top scorer. A serial record-breaker. The most clinical striker of his generation. Harry Kane has shattered every record imaginable — except the one that matters most. 60 years of hurt ends here.",
     photo: {
       url: "/harry%20kane.jpg",
       text: "Harry Kane",
@@ -68,6 +74,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Virgil van Dijk",
     binomial: "Netherlands",
+    lure: "The most commanding defender in the world leads the Netherlands into their greatest-ever shot at glory. Unbreakable at the back, unstoppable at set pieces — Van Dijk is on a mission to end 50 years of near-misses.",
     photo: {
       url: "/vandijk.jpg",
       text: "Virgil van Dijk",
@@ -78,6 +85,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Erling Haaland",
     binomial: "Norway",
+    lure: "A machine built for one purpose: scoring goals. Erling Haaland steps onto the biggest stage of his life carrying the most ferocious scoring record in football — and he has never looked more unstoppable.",
     photo: {
       url: "/haaland.jpg",
       text: "Erling Haaland",
@@ -88,6 +96,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
   {
     common: "Florian Wirtz",
     binomial: "Germany",
+    lure: "Germany have given the world Müller, Beckenbauer, Klose. Now, at 22, Florian Wirtz stands ready to join that pantheon — a once-in-a-generation talent about to announce himself to the entire planet.",
     photo: {
       url: "/wirtz.jpg",
       text: "Florian Wirtz",
