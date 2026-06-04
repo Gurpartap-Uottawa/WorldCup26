@@ -33,7 +33,7 @@ const WC_GALLERY_ITEMS: GalleryItem[] = [
     binomial: "France",
     lure: "France's captain at 27, Kylian Mbappé enters this tournament at the absolute summit of his powers. He was denied the trophy in 2022 by the finest of margins — this time, he has unfinished business.",
     photo: {
-      url: "/mbappe.jpg",
+      url: "/mbappe1.jpg",
       text: "Kylian Mbappé",
       pos: "center top",
       by: "France",
@@ -185,8 +185,8 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero — Circular Gallery ────────────────────────────────────────── */}
-      {/* 500vh gives the scroll-driven rotation room to breathe */}
-      <div style={{ height: "500vh", background: "#0a0f2c" }}>
+      {/* 500vh on desktop gives scroll-driven rotation room; mobile uses swipe so just 100vh */}
+      <div className="h-screen md:h-[500vh]" style={{ background: "#0a0f2c" }}>
         <div
           className="sticky top-0 h-screen overflow-hidden"
           style={{ background: "#0a0f2c" }}
