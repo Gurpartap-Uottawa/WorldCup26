@@ -74,12 +74,14 @@ function FinderContent() {
     if (date) {
       setSelectedDate(date)
       setShowCalendar(false)
+      setMobileTab("matches")
     }
   }
 
   const handleMatchClick = (match: Match) => {
     setFocusedMatchCity(match.city)
     setSelectedCity(match.city)
+    setMobileTab("map")
   }
 
   const filteredScreenings = selectedCity
@@ -112,8 +114,8 @@ function FinderContent() {
             className="flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg"
             style={{ color: "rgba(255,255,255,0.45)", border: "1px solid #1a2857" }}
           >
-            <CalendarDays size={14} />
-            <span className="hidden sm:inline">Full Calendar</span>
+            <CalendarDays size={14} className="hidden sm:block" />
+            <span>Full Calendar</span>
           </Link>
           <span className="text-white/60 text-sm hidden lg:block">
             {format(selectedDate, "EEEE, MMM d, yyyy")}
@@ -193,7 +195,10 @@ function FinderContent() {
             loading={loadingMatches}
             selectedCity={selectedCity}
             onMatchClick={handleMatchClick}
-            onCityFilter={city => { setSelectedCity(city); setMobileTab("map") }}
+            onCityFilter={city => {
+              setSelectedCity(city)
+              setFocusedMatchCity(city)
+            }}
           />
         </div>
 
