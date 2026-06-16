@@ -1,6 +1,7 @@
 import asyncio
 import os
 import time
+from datetime import datetime, timedelta
 from typing import Any
 
 import httpx
@@ -32,16 +33,14 @@ _CITY_UTC_OFFSET: dict[str, int] = {
 }
 _TZ_ABBR: dict[int, str] = {-4: "ET", -5: "CT", -7: "PT"}
 
-def _utc_to_local(time_utc: str, city: str | None) -> str:
-    """Convert 'HH:MM' UTC to '3:00 PM ET' style local string."""
-    offset = _CITY_UTC_OFFSET.get(city or "", -5)
-    abbr = _TZ_ABBR.get(offset, "CT")
+def _utc_to_local(time_utc: str, city: str | None = None) -> str:
+    """Convert 'HH:MM' UTC to Eastern Time (ET) for Canadian users."""
     try:
         h, m = int(time_utc[:2]), int(time_utc[3:5])
-        local_h = (h + offset) % 24
-        period = "AM" if local_h < 12 else "PM"
-        display_h = local_h % 12 or 12
-        return f"{display_h}:{m:02d} {period} {abbr}"
+        et_h = (h - 4) % 24  # EDT = UTC-4 (summer)
+        period = "AM" if et_h < 12 else "PM"
+        display_h = et_h % 12 or 12
+        return f"{display_h}:{m:02d} {period} ET"
     except Exception:
         return time_utc
 
@@ -90,8 +89,12 @@ async def _fetch_all_wc_matches() -> list[dict]:
     matches: list[dict] = []
     for m in raw.get("matches", []):
         utc = m["utcDate"]
-        date_str = utc[:10]
         time_utc = utc[11:16]
+        # Convert to ET date so matches show under the correct day for Canadian/US users
+        utc_dt = datetime(int(utc[:4]), int(utc[5:7]), int(utc[8:10]),
+                          int(utc[11:13]), int(utc[14:16]))
+        et_dt = utc_dt - timedelta(hours=4)  # EDT = UTC-4
+        date_str = et_dt.strftime("%Y-%m-%d")
         stage = _map_stage(m.get("stage", ""))
         group = _map_group(m.get("group"))
         home = (m["homeTeam"].get("name") or "TBD")
