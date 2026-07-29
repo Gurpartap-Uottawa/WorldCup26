@@ -21,7 +21,7 @@ worldcup2026/
 │   ├── requirements.txt
 │   ├── .env.example
 │   └── data/
-│       └── schedule.py   # hardcoded full schedule + fan festival locations
+│       └── schedule.py   # full schedule + fan festival locations
 └── frontend/         # Next.js 16 + Tailwind CSS 4
     ├── app/
     │   ├── layout.tsx
