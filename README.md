@@ -97,7 +97,7 @@ chmod +x run.sh
 
 ## Notes
 
-- The match schedule is hardcoded based on the best available published draw information. Group assignments and exact kickoff times for the later rounds (Round of 32 onwards) will only be confirmed after the group stage.
+- Group assignments and exact kickoff times for the later rounds (Round of 32 onwards) will only be confirmed after the group stage. All the data is fetched using a sports data API
 - Serper searches run in parallel for all host cities on a given match day.
 - The chatbot includes current-day matches and screenings as context in every message.
 - Without a Google Maps key, the map panel shows a fallback list of screenings.
