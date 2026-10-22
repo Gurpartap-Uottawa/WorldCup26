@@ -1,7 +1,8 @@
 import asyncio
+import json
 import os
-import time
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -12,8 +13,7 @@ from groq import Groq
 from pydantic import BaseModel
 
 from data.schedule import (
-    COUNTRY_FLAGS, FIFA_FAN_FESTIVALS, MATCH_ID_TO_VENUE, MATCHES,
-    POPULAR_WATCH_SPOTS, STADIUM_LOCATIONS,
+    COUNTRY_FLAGS, FIFA_FAN_FESTIVALS, POPULAR_WATCH_SPOTS, STADIUM_LOCATIONS,
 )
 
 load_dotenv()
@@ -21,7 +21,6 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY", "")
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
-FOOTBALL_DATA_API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "")
 
 # UTC offsets (summer/DST) for each host city
 _CITY_UTC_OFFSET: dict[str, int] = {
@@ -44,9 +43,9 @@ def _utc_to_local(time_utc: str, city: str | None = None) -> str:
     except Exception:
         return time_utc
 
-# ── Live match cache ──────────────────────────────────────────────────────────
-_matches_cache: dict = {"ts": 0.0, "data": []}
-_CACHE_TTL = 1800  # refresh every 30 min
+# ── Frozen match data (see docs/adr/0001-freeze-schedule-after-tournament.md) ─
+_MATCHES_FILE = Path(__file__).parent / "data" / "matches_2026.json"
+_matches_cache: list[dict] = []
 
 def _map_stage(s: str) -> str:
     return {
@@ -65,63 +64,41 @@ def _map_group(g: str | None) -> str:
     return g or ""
 
 async def _fetch_all_wc_matches() -> list[dict]:
-    """Return all 104 WC2026 matches, cached for 30 min."""
-    now = time.time()
-    if now - _matches_cache["ts"] < _CACHE_TTL and _matches_cache["data"]:
-        return _matches_cache["data"]
+    """Return all 104 WC2026 matches from the frozen, verified data file."""
+    if _matches_cache:
+        return _matches_cache
 
-    if not FOOTBALL_DATA_API_KEY:
-        return MATCHES  # fall back to static data
-
-    try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                "https://api.football-data.org/v4/competitions/WC/matches",
-                headers={"X-Auth-Token": FOOTBALL_DATA_API_KEY},
-                params={"season": "2026"},
-                timeout=15.0,
-            )
-            resp.raise_for_status()
-            raw = resp.json()
-    except Exception:
-        return _matches_cache["data"] or MATCHES
+    raw = json.loads(_MATCHES_FILE.read_text(encoding="utf-8"))
 
     matches: list[dict] = []
-    for m in raw.get("matches", []):
-        utc = m["utcDate"]
+    for m in raw["matches"]:
+        utc = m["utc"]
         time_utc = utc[11:16]
         # Convert to ET date so matches show under the correct day for Canadian/US users
         utc_dt = datetime(int(utc[:4]), int(utc[5:7]), int(utc[8:10]),
                           int(utc[11:13]), int(utc[14:16]))
         et_dt = utc_dt - timedelta(hours=4)  # EDT = UTC-4
         date_str = et_dt.strftime("%Y-%m-%d")
-        stage = _map_stage(m.get("stage", ""))
-        group = _map_group(m.get("group"))
-        home = (m["homeTeam"].get("name") or "TBD")
-        away = (m["awayTeam"].get("name") or "TBD")
-        venue_info = MATCH_ID_TO_VENUE.get(m["id"], {})
-        venue = venue_info.get("venue", "TBD")
-        city = venue_info.get("city", "TBD")
-        score = m.get("score", {})
-        ft = score.get("fullTime", {})
         matches.append({
             "id": m["id"],
             "date": date_str,
-            "group": group,
-            "home": home,
-            "away": away,
+            "group": _map_group(m["group"]),
+            "home": m["home"],
+            "away": m["away"],
             "time_utc": time_utc,
-            "time_local": _utc_to_local(time_utc, city),
-            "venue": venue,
-            "city": city,
-            "stage": stage,
-            "status": m.get("status", "SCHEDULED"),
-            "score_home": ft.get("home"),
-            "score_away": ft.get("away"),
+            "time_local": _utc_to_local(time_utc, m["city"]),
+            "venue": m["venue"],
+            "city": m["city"],
+            "stage": _map_stage(m["stage"]),
+            "status": "FINISHED",
+            "score_home": m["score_home"],  # includes extra time, excludes penalties
+            "score_away": m["score_away"],
+            "duration": m["duration"],      # REGULAR | EXTRA_TIME | PENALTY_SHOOTOUT
+            "pens_home": m["pens_home"],
+            "pens_away": m["pens_away"],
         })
 
-    _matches_cache["ts"] = now
-    _matches_cache["data"] = matches
+    _matches_cache.extend(matches)
     return matches
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]

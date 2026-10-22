@@ -21,7 +21,10 @@ const WC_END = new Date(2026, 6, 19)
 function parseDateParam(param: string | null): Date {
   if (!param) return WC_START
   const d = new Date(param + "T12:00:00")
-  if (isNaN(d.getTime()) || d < WC_START || d > WC_END) return WC_START
+  if (isNaN(d.getTime())) return WC_START
+  // Compare calendar days only: noon on July 19 must still count as in range
+  const day = format(d, "yyyy-MM-dd")
+  if (day < format(WC_START, "yyyy-MM-dd") || day > format(WC_END, "yyyy-MM-dd")) return WC_START
   return d
 }
 
